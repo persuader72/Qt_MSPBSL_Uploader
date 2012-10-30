@@ -55,6 +55,7 @@ protected:
 private slots:
     void on_SerialPort_ReadyRead();
 private:
+    void BSLPolling();
     void tryToSend();
 private:
     bslState mState;

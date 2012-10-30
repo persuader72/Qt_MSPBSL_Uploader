@@ -69,12 +69,12 @@ void BootStrapLoader::run() {
 
 
     if(mSerialPort->open(QIODevice::ReadWrite)) {
-        int timerid=startTimer(100);
+        int timerid=startTimer(50);
         setState(serial);
         exec();
         killTimer(timerid);
     } else {
-        setError("Serial Port",QString("Can't open serial port %1").arg(mSerialPortName));
+        setError("Serial Port",QString("Can't open serial port %1 error %s").arg(mSerialPortName).arg(mSerialPort->errorString().toAscii().constData()));
     }
 
     qDebug("BootStrapLoader::run exited");
@@ -94,10 +94,11 @@ void BootStrapLoader::timerEvent(QTimerEvent *) {
     switch(mState) {
     case serial:
         if(mOutPacket==NULL) {
-            // Polling bootloader requesting version packet
-            mOutPacket=new BSLCoreCommmand(0x19,BSLCoreCommmand::NULL_ADDRESS);
+            // Polling bootloader requesting version packet at 3Hz
+            if(mTimeout.elapsed()>333) BSLPolling();
         } else {
             if(mTimeout.elapsed()>mOutPacket->timeout()) {
+               qDebug("BootStrapLoader::timerEvent timeout for packet");
                mOutPacket=NULL;
             }
         }
@@ -122,6 +123,12 @@ void BootStrapLoader::on_SerialPort_ReadyRead() {
     }
 }
 
+void BootStrapLoader::BSLPolling() {
+    mOutPacket=mPollPacket;
+    mTimeout.start();
+    tryToSend();
+}
+
 void BootStrapLoader::tryToSend() {
     if(mOutPacket==NULL && mOutQueue.size()>0) {
         mOutPacket = mOutQueue.takeFirst();
@@ -134,7 +141,7 @@ void BootStrapLoader::tryToSend() {
         switch(mOutPacket->sequence()) {
         case BSLPacket::seqIdle:
             mTimeout.start();
-            //mOutPacket->setSequence(BSLPacket::seqDataAckWait);
+            mOutPacket->setSequence(BSLPacket::seqAckWait);
             //qDebug() << mOutPacket->assemblePacket().toHex();
             //mSerialPort->write(mOutPacket->assemblePacket());
             break;
