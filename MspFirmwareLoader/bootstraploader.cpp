@@ -29,6 +29,7 @@
 
 #include "bootstraploader.h"
 #include "bslsendpacketevent.h"
+#include "bslcorecommmand.h"
 
 #include "qextserialport.h"
 
@@ -38,18 +39,21 @@ BootStrapLoader::BootStrapLoader(QObject *parent) : QThread(parent) {
     setState(idle);
     mSerialPortName="/dev/ttyUSB0";
     mSerialPort=NULL;
+    // BSL Packt used to detect bsl (tx version)
+    mPollPacket= new BSLCoreCommmand(0x19,BSLCoreCommmand::NULL_ADDRESS);
 }
 
 BootStrapLoader::~BootStrapLoader() {
+    delete mPollPacket;
 }
 
 void BootStrapLoader::setState(BootStrapLoader::bslState state) {
     mState=state;
-    emit onStateChanged(mState);
+    emit stateChanged(mState);
 }
 
 void BootStrapLoader::setError(QString errorTitle, QString errorText) {
-    emit onErrorRised(errorTitle,errorText);
+    emit errorRised(errorTitle,errorText);
 }
 
 void BootStrapLoader::doQueuePacket(BSLPacket *packet) {
@@ -63,9 +67,12 @@ void BootStrapLoader::run() {
     mSerialPort->setBaudRate(BAUD115200);
     connect(mSerialPort,SIGNAL(readyRead()),this,SLOT(on_SerialPort_ReadyRead()));
 
+
     if(mSerialPort->open(QIODevice::ReadWrite)) {
+        int timerid=startTimer(100);
         setState(serial);
         exec();
+        killTimer(timerid);
     } else {
         setError("Serial Port",QString("Can't open serial port %1").arg(mSerialPortName));
     }
@@ -83,31 +90,33 @@ void BootStrapLoader::customEvent(QEvent *e) {
     }
 }
 
+void BootStrapLoader::timerEvent(QTimerEvent *) {
+    switch(mState) {
+    case serial:
+        if(mOutPacket==NULL) {
+            // Polling bootloader requesting version packet
+            mOutPacket=new BSLCoreCommmand(0x19,BSLCoreCommmand::NULL_ADDRESS);
+        } else {
+            if(mTimeout.elapsed()>mOutPacket->timeout()) {
+               mOutPacket=NULL;
+            }
+        }
+        break;
+    default:
+        break;
+    }
+}
+
 void BootStrapLoader::on_SerialPort_ReadyRead() {
     quint8 incoming;
     while(mSerialPort->read((char *)&incoming,1)>0) {
         if(mOutPacket==NULL) {
             qDebug("Data recevived but no packet active!!!");
         } else {
-            switch(mOutPacket->sequence()) {
-            case BSLPacket::seqDataAckWait:
-                if(incoming==0x90) {
-                    if(mOutPacket->commandReply()) {
-                        mOutPacket->setSequence(BSLPacket::seqReplyWait);
-                    } else {
-                        mOutPacket->setSequence(BSLPacket::seqIdle);
-                        mComplQueue.append(mOutPacket);
-                        mOutPacket = NULL;
-                        tryToSend();
-                    }
-                } else {
-                    mOutPacket->setSequence(BSLPacket::seqError);
-                    qDebug("Wrong replay to data packet!!!");
-                }
-                break;
-            default:
-                qDebug("Packet already sent!!!");
-                break;
+            if(mOutPacket->reply()->incomingByte(incoming)) {
+                mComplQueue.append(mOutPacket);
+                emit replyReceived(mOutPacket);
+                mOutPacket=NULL;
             }
         }
     }
@@ -124,6 +133,7 @@ void BootStrapLoader::tryToSend() {
 
         switch(mOutPacket->sequence()) {
         case BSLPacket::seqIdle:
+            mTimeout.start();
             //mOutPacket->setSequence(BSLPacket::seqDataAckWait);
             //qDebug() << mOutPacket->assemblePacket().toHex();
             //mSerialPort->write(mOutPacket->assemblePacket());

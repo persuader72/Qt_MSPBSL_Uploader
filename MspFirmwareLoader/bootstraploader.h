@@ -31,6 +31,7 @@
 #define BOOTSTRAPLOADER_H
 
 #include <QThread>
+#include <QTime>
 #include "bslpacket.h"
 
 class QextSerialPort;
@@ -50,6 +51,7 @@ public:
 protected:
     virtual void run();
     virtual void customEvent(QEvent * e);
+    virtual void timerEvent(QTimerEvent *);
 private slots:
     void on_SerialPort_ReadyRead();
 private:
@@ -63,12 +65,15 @@ private:
     QByteArray mIncomingPacket;
     //BSLPacket mIncomingPacket;
 private:
+    QTime mTimeout;
     BSLPacket *mOutPacket;
     QList<BSLPacket *> mOutQueue;
     QList<BSLPacket *> mComplQueue;
+    BSLPacket *mPollPacket;
 signals:
-    void onStateChanged(int state);
-    void onErrorRised(const QString &title,const QString &text);
+    void stateChanged(int state);
+    void errorRised(const QString &title,const QString &text);
+    void replyReceived(BSLPacket *);
 };
 
 #endif // BOOTSTRAPLOADER_H

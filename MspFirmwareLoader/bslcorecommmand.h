@@ -32,10 +32,11 @@
 
 #include "bslpacket.h"
 
-#define BSLCORE_NULL_ADDRESS 0xFFFFFFFF
-
 class BSLCoreCommmand : public BSLPacket {
 public:
+    static const quint32 NULL_ADDRESS = 0xFFFFFFFF;
+public:
+
     BSLCoreCommmand(quint8 command, quint32 address);
     const QByteArray assemblePacket();
 protected:

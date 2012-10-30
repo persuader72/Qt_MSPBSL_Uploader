@@ -42,8 +42,9 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWindow) {
     ui->setupUi(this);
     mBsl = new BootStrapLoader(this);
-    connect(mBsl,SIGNAL(onStateChanged(int)),this,SLOT(onBslStateChanged(int)));
-    connect(mBsl,SIGNAL(onErrorRised(QString,QString)),SLOT(onBslErrorRised(QString,QString)));
+    connect(mBsl,SIGNAL(stateChanged(int)),this,SLOT(onBslStateChanged(int)));
+    connect(mBsl,SIGNAL(errorRised(QString,QString)),SLOT(onBslErrorRised(QString,QString)));
+    connect(mBsl,SIGNAL(replyReceived(BSLPacket*)),this,SLOT(onBslReplyReceived(BSLPacket*)));
     startTimer(333);
 }
 
@@ -64,6 +65,9 @@ void MainWindow::onBslErrorRised(const QString &title, const QString &text) {
     QMessageBox::warning(this,title,text);
 }
 
+void MainWindow::onBslReplyReceived(BSLPacket *) {
+}
+
 void MainWindow::on_FirmwareLoadButton_clicked() {
     QString fn=QFileDialog::getOpenFileName(this,"Select intel hex firmware file","","*.hex");
     if(!fn.isNull()) {
@@ -76,7 +80,7 @@ void MainWindow::on_FirmwareLoadButton_clicked() {
         }
     }
 
-    BSLCoreCommmand *pktVersion = new BSLCoreCommmand(0x19,BSLCORE_NULL_ADDRESS);
+    BSLCoreCommmand *pktVersion = new BSLCoreCommmand(0x19,BSLCoreCommmand::NULL_ADDRESS);
     QApplication::instance()->postEvent (mBsl, new BslSendPacketEvent(pktVersion));
 }
 

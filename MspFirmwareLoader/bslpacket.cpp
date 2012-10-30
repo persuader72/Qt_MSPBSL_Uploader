@@ -30,7 +30,66 @@
 #include "bslpacket.h"
 
 BSLPacket::BSLPacket()  {
+    // 100ms default timeout
+    mTimeout=100;
+    mReply=NULL;
     clear();
+}
+
+BSLPacket::~BSLPacket() {
+    if(mReply) delete mReply;
+}
+
+bool BSLPacket::incomingByte(quint8 incoming) {
+    switch(sequence()) {
+    case seqAckWait:
+        if(incoming==0x00) {
+            setSequence(seqHeaderWait);
+        } else {
+            setSequence(seqError);
+            qDebug("Wrong replay to data packet!!!");
+        }
+        break;
+    case seqHeaderWait:
+        if(incoming==0x80) {
+            setSequence(seqLenghtLWait);
+        } else {
+            setSequence(seqError);
+            qDebug("Wrong replay to data packet!!!");
+        }
+        break;
+    case seqLenghtLWait:
+        mLength = incoming;
+        setSequence(seqLenghtHWait);
+        break;
+    case seqLenghtHWait:
+        mLength = ((quint16)incoming)<<8;
+        setSequence(seqReplyWait);
+        break;
+    case seqReplyWait:
+        mPayload.resize(mPayload.size()+1);
+        mPayload[mPayload.size()-1]=incoming;
+        if(mPayload.size()==mLength) setSequence(seqCrcLWait);
+        break;
+    case seqCrcLWait:
+        mCrc16 = incoming;
+        setSequence(seqCrcHWait);
+        break;
+    case seqCrcHWait:
+        mCrc16 = ((quint16)incoming)<<8;
+        if(payloadCrc()==mCrc16) setSequence(seqDone); else setSequence(seqError);
+        break;
+    default:
+        qDebug("Invalid sequence state!!!");
+        break;
+    }
+
+    return mSequence==seqDone || mSequence==seqError;
+}
+
+BSLPacket *BSLPacket::reply() {
+    if(!mReply) mReply=new BSLPacket();
+    return mReply;
 }
 
 const QByteArray BSLPacket::assemblePacket() {
@@ -51,53 +110,10 @@ const QByteArray BSLPacket::assemblePacket() {
     return out;
 }
 
-void BSLPacket::incomingByte(quint8 byte) {
-    /*switch(mDecode) {
-    case decodeHeader:
-        if(byte==0x80) mDecode=decodeCommand;
-        break;
-    case decodeCommand:
-        mCommand=byte;
-        mDecode=decodeLength1;
-        break;
-    case decodeLength1:
-        mLength=byte;
-        mDecode=decodeLenght2;
-        break;
-    case decodeLenght2:
-        if(mLength==byte) {
-            mPayload.resize(mLength-4);
-            mDecode=decodeAddressLo;
-        } else {
-            clear();
-        }
-        break;
-    case decodeAddressLo:
-        mAddress=byte;
-        mDecode=decodeAddressHi;
-        break;
-    case decodeAddressHi:
-        mAddress=byte<<8;
-        mDecode=decodeDataByteLo;
-        break;
-    case decodeDataByteLo:
-        mDataBytes=byte;
-        mDecode=decocdeDataByteHi;
-        break;
-    case decocdeDataByteHi:
-        mDataBytes=byte<<8;
-        mDecode=decodePayload;
-        break;
-    case decodePayload:
-        mPayload[0]=byte;
-        break;
-    case decodeCrcLo:
-        mPayload[0]=byte;
-        break;
-    case decocdeCrcHi:
-        mPayload[0]=byte;
-        break;
-    }*/
+quint16 BSLPacket::payloadCrc() {
+    quint16 crc16 = 0xFFFF;
+    for(int i=0;i<mPayload.size();i++) crcAddByte(mPayload.at(i));
+    return crc16;
 }
 
 void BSLPacket::crcAddByte(quint8 byte) {
@@ -107,10 +123,9 @@ void BSLPacket::crcAddByte(quint8 byte) {
 }
 
 void BSLPacket::clear() {
+    if(mReply) delete mReply;
     mSequence = seqIdle;
-
     mPayload.clear();
-    mCommandReply=false;
     mLength=0;
     mCrc16=0;
 }

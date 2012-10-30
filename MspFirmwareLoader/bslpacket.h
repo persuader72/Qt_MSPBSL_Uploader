@@ -35,29 +35,35 @@
 
 class BSLPacket {
 public:
-
-    enum eSequence { seqIdle,seqDataAckWait,seqDataAckRecv,seqReplyWait,seqDone,seqError };
-
+    enum eSequence { seqIdle,seqAckWait,seqHeaderWait,seqLenghtLWait,
+                     seqLenghtHWait,seqReplyWait,seqCrcLWait,seqCrcHWait,seqDone,seqError };
+public:
     BSLPacket();
+    virtual ~BSLPacket();
+public:
     eSequence sequence() { return mSequence; }
     void setSequence(eSequence seq) { mSequence=seq; }
-    bool commandReply() { return mCommandReply; }
-
+    int timeout() const { return mTimeout; }
+    bool incomingByte(quint8 incoming);
+    const BSLPacket *reply() const { return mReply; }
+    BSLPacket *reply();
+public:
     virtual const QByteArray assemblePacket();
-
-    void incomingByte(quint8 byte);
 private:
+    quint16 payloadCrc();
     void crcAddByte(quint8 byte);
 private:
     void clear();
 private:
     eSequence mSequence;
+    int mTimeout;
 protected:
     QByteArray mPayload;
 private:
-    bool mCommandReply;
     quint16 mLength;
     quint16 mCrc16;
+private:
+    BSLPacket *mReply;
 };
 
 #endif // BSLPACKET_H
