@@ -30,6 +30,7 @@
 #include "bootstraploader.h"
 #include "bslsendpacketevent.h"
 #include "bslcorecommmand.h"
+#include "bslcoremessage.h"
 
 #include "qextserialport.h"
 
@@ -64,7 +65,7 @@ void BootStrapLoader::doQueuePacket(BSLPacket *packet) {
 void BootStrapLoader::run() {
     mSerialPort = new QextSerialPort();
     mSerialPort->setPortName(mSerialPortName);
-    mSerialPort->setBaudRate(BAUD115200);
+    mSerialPort->setBaudRate(BAUD9600);
     connect(mSerialPort,SIGNAL(readyRead()),this,SLOT(on_SerialPort_ReadyRead()));
 
 
@@ -95,7 +96,7 @@ void BootStrapLoader::timerEvent(QTimerEvent *) {
     case serial:
         if(mOutPacket==NULL) {
             // Polling bootloader requesting version packet at 3Hz
-            if(mTimeout.elapsed()>333) BSLPolling();
+            if(mTimeout.elapsed()>5000) BSLPolling();
         } else {
             if(mTimeout.elapsed()>mOutPacket->timeout()) {
                qDebug("BootStrapLoader::timerEvent timeout for packet");
@@ -124,6 +125,8 @@ void BootStrapLoader::on_SerialPort_ReadyRead() {
 }
 
 void BootStrapLoader::BSLPolling() {
+    mPollPacket->setSequence(BSLPacket::seqIdle);
+    mPollPacket->reply()->setSequence(BSLPacket::seqAckWait);
     mOutPacket=mPollPacket;
     mTimeout.start();
     tryToSend();
@@ -142,8 +145,8 @@ void BootStrapLoader::tryToSend() {
         case BSLPacket::seqIdle:
             mTimeout.start();
             mOutPacket->setSequence(BSLPacket::seqAckWait);
-            //qDebug() << mOutPacket->assemblePacket().toHex();
-            //mSerialPort->write(mOutPacket->assemblePacket());
+            qDebug() << mOutPacket->assemblePacket().toHex();
+            mSerialPort->write(mOutPacket->assemblePacket());
             break;
         default:
             qDebug("Packet already sent!!!");

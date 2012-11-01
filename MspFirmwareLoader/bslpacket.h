@@ -30,9 +30,9 @@
 #ifndef BSLPACKET_H
 #define BSLPACKET_H
 
+#include <QByteArray>
 
- #include <QByteArray>
-
+class BSLCoreMessage;
 class BSLPacket {
 public:
     enum eSequence { seqIdle,seqAckWait,seqHeaderWait,seqLenghtLWait,
@@ -45,10 +45,11 @@ public:
     void setSequence(eSequence seq) { mSequence=seq; }
     int timeout() const { return mTimeout; }
     bool incomingByte(quint8 incoming);
-    const BSLPacket *reply() const { return mReply; }
-    BSLPacket *reply();
+    const BSLCoreMessage *reply() const { return (const BSLCoreMessage *)mReply; }
+    BSLCoreMessage *reply();
 public:
     virtual const QByteArray assemblePacket();
+    virtual void deassemblePacket(const QByteArray &);
 private:
     quint16 payloadCrc();
     void crcAddByte(quint8 byte);

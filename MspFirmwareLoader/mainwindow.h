@@ -48,7 +48,7 @@ protected:
 private slots:
     void onBslStateChanged(int state);
     void onBslErrorRised(const QString &,const QString &);
-    void onBslReplyReceived(BSLPacket *);
+    void onBslReplyReceived(BSLPacket * packet);
 private slots:
     void on_FirmwareLoadButton_clicked();
     void on_SerialConnectButton_clicked();

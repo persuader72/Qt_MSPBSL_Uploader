@@ -31,7 +31,7 @@
 
 BSLPacket::BSLPacket()  {
     // 100ms default timeout
-    mTimeout=100;
+    mTimeout=4000;
     mReply=NULL;
     clear();
 }
@@ -41,6 +41,8 @@ BSLPacket::~BSLPacket() {
 }
 
 bool BSLPacket::incomingByte(quint8 incoming) {
+    //qDebug("BSLPacket::incomingByte %d %d %02X",mSequence,mLength,incoming);
+
     switch(sequence()) {
     case seqAckWait:
         if(incoming==0x00) {
@@ -63,7 +65,7 @@ bool BSLPacket::incomingByte(quint8 incoming) {
         setSequence(seqLenghtHWait);
         break;
     case seqLenghtHWait:
-        mLength = ((quint16)incoming)<<8;
+        mLength += ((quint16)incoming)<<8;
         setSequence(seqReplyWait);
         break;
     case seqReplyWait:
@@ -77,7 +79,7 @@ bool BSLPacket::incomingByte(quint8 incoming) {
         break;
     case seqCrcHWait:
         mCrc16 = ((quint16)incoming)<<8;
-        if(payloadCrc()==mCrc16) setSequence(seqDone); else setSequence(seqError);
+        if(payloadCrc()==mCrc16) deassemblePacket(mPayload); else setSequence(seqError);
         break;
     default:
         qDebug("Invalid sequence state!!!");
@@ -87,9 +89,9 @@ bool BSLPacket::incomingByte(quint8 incoming) {
     return mSequence==seqDone || mSequence==seqError;
 }
 
-BSLPacket *BSLPacket::reply() {
+BSLCoreMessage *BSLPacket::reply() {
     if(!mReply) mReply=new BSLPacket();
-    return mReply;
+    return (BSLCoreMessage *)mReply;
 }
 
 const QByteArray BSLPacket::assemblePacket() {
@@ -108,6 +110,9 @@ const QByteArray BSLPacket::assemblePacket() {
     out[i++] = (quint8)((mCrc16&0xFF00)>>8);
 
     return out;
+}
+
+void BSLPacket::deassemblePacket(const QByteArray &) {
 }
 
 quint16 BSLPacket::payloadCrc() {

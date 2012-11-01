@@ -38,6 +38,7 @@
 
 #include "bslsendpacketevent.h"
 #include "bslrxpassword.h"
+#include "bslcoremessage.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWindow) {
     ui->setupUi(this);
@@ -65,7 +66,11 @@ void MainWindow::onBslErrorRised(const QString &title, const QString &text) {
     QMessageBox::warning(this,title,text);
 }
 
-void MainWindow::onBslReplyReceived(BSLPacket *) {
+void MainWindow::onBslReplyReceived(BSLPacket *packet) {
+    qDebug("MainWindow::onBslReplyReceived");
+    if(packet->reply()) {
+        qDebug("MainWindow::onBslReplyReceived %d",packet->reply()->command());
+    }
 }
 
 void MainWindow::on_FirmwareLoadButton_clicked() {

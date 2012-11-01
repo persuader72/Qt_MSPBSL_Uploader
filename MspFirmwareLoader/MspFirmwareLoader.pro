@@ -18,7 +18,8 @@ SOURCES += main.cpp\
     qintelhexparser.cpp \
     bslcorecommmand.cpp \
     bslrxpassword.cpp \
-    bslsendpacketevent.cpp
+    bslsendpacketevent.cpp \
+    bslcoremessage.cpp
 
 HEADERS  += mainwindow.h \
     bootstraploader.h \
@@ -26,6 +27,7 @@ HEADERS  += mainwindow.h \
     qintelhexparser.h \
     bslcorecommmand.h \
     bslrxpassword.h \
-    bslsendpacketevent.h
+    bslsendpacketevent.h \
+    bslcoremessage.h
 
 FORMS    += mainwindow.ui

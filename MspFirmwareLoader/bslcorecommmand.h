@@ -35,8 +35,8 @@
 class BSLCoreCommmand : public BSLPacket {
 public:
     static const quint32 NULL_ADDRESS = 0xFFFFFFFF;
+    enum {massErase=0x15,txBslVersion=0x19};
 public:
-
     BSLCoreCommmand(quint8 command, quint32 address);
     const QByteArray assemblePacket();
 protected:

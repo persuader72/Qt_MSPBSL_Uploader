@@ -33,7 +33,7 @@
       <item>
        <widget class="QLineEdit" name="SerialPortNameEdit">
         <property name="text">
-         <string>/dev/ttyUSB0</string>
+         <string>/dev/pts/3</string>
         </property>
        </widget>
       </item>
