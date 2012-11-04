@@ -34,6 +34,7 @@
 
 class BSLRxPassword : public BSLCoreCommmand {
 public:
+    BSLRxPassword();
     BSLRxPassword(QByteArray password);
     virtual const QByteArray assemblePacket();
 private:

@@ -36,6 +36,7 @@ QIntelHexParser::QIntelHexParser() {
 }
 
 QIntelHexParser::QIntelHexParser(const QString &filename) {
+    mEndOfFile=false;
     parseFile(filename);
 }
 

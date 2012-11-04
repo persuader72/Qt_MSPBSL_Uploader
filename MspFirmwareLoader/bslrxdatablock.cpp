@@ -4,7 +4,7 @@
 **
 ** This file is part of Qt_MSPBSL_Uploader.
 **
-** Nome-Programma is free software: you can redistribute it and/or modify
+** Qt_MSPBSL_Uploader is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
@@ -27,21 +27,8 @@
 **
 ****************************************************************************/
 
-#include "bslcoremessage.h"
-#include <QDebug>
+#include "bslrxdatablock.h"
 
-BSLCoreMessage::BSLCoreMessage() {
-    setSequence(seqAckWait);
-}
-
-void BSLCoreMessage::deassemblePacket(const QByteArray &payload) {
-    qDebug() << "BSLCoreMessage::deassemblePacket" << payload;
-    if(mPayload.size()==0) {
-        setSequence(seqError);
-        return;
-    }
-
-    mCommand=payload.at(0);
-    if(mPayload.size()>1) mMessage=mPayload.right(mPayload.size()-1);
-    setSequence(seqDone);
+BSLRxDataBlock::BSLRxDataBlock(quint32 address, const QByteArray &payload) : BSLCoreCommmand(rxDataBlock,address) {
+    mCoreCommmandPayload=payload;
 }

@@ -39,6 +39,8 @@
 #include "bslsendpacketevent.h"
 #include "bslrxpassword.h"
 #include "bslcoremessage.h"
+#include "bslrxpassword.h"
+#include "bslrxdatablock.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWindow) {
     ui->setupUi(this);
@@ -60,6 +62,15 @@ void MainWindow::timerEvent(QTimerEvent *) {
 }
 
 void MainWindow::onBslStateChanged(int state) {
+    qDebug("MainWindow::onBslStateChanged %d",state);
+    switch(state) {
+    case BootStrapLoader::serial:
+        ui->SerialPortGroup->setEnabled(false);
+        break;
+    case BootStrapLoader::bsl:
+        if(parser.endOfFile()) ui->OperationGroup->setEnabled(true);
+        break;
+    }
 }
 
 void MainWindow::onBslErrorRised(const QString &title, const QString &text) {
@@ -82,11 +93,11 @@ void MainWindow::on_FirmwareLoadButton_clicked() {
             qDebug()<< f.errorString();
         } else {
             parser.parseFile(f);
+            if(parser.endOfFile() && mBsl->state()==BootStrapLoader::bsl) {
+                onBslStateChanged(mBsl->state());
+            }
         }
     }
-
-    BSLCoreCommmand *pktVersion = new BSLCoreCommmand(0x19,BSLCoreCommmand::NULL_ADDRESS);
-    QApplication::instance()->postEvent (mBsl, new BslSendPacketEvent(pktVersion));
 }
 
 void MainWindow::on_SerialConnectButton_clicked() {
@@ -96,4 +107,19 @@ void MainWindow::on_SerialConnectButton_clicked() {
         mBsl->setPortName(ui->SerialPortNameEdit->text());
         mBsl->start();
     }
+}
+
+void MainWindow::on_OperationStartButton_clicked() {
+    mBsl->doPostPacket(new BSLCoreCommmand(BSLCoreCommmand::massErase,BSLCoreCommmand::NULL_ADDRESS));
+    mBsl->doPostPacket(new BSLRxPassword());
+
+    for(int i=0;i<parser.segments().count();i++) {
+        int j=0;
+        const QIntelHexMemSegment &segment = parser.segments().at(i);
+        for(;j<segment.memory.size();j+=32) {
+            mBsl->doPostPacket(new BSLRxDataBlock(segment.address+j,segment.memory.mid(j,32)));
+        }
+        qDebug() << j << segment.memory.size();
+    }
+
 }

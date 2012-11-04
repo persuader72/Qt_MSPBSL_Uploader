@@ -28,6 +28,8 @@
 ****************************************************************************/
 
 #include "bslpacket.h"
+#include "bslcoremessage.h"
+#include <QDebug>
 
 BSLPacket::BSLPacket()  {
     // 100ms default timeout
@@ -78,8 +80,12 @@ bool BSLPacket::incomingByte(quint8 incoming) {
         setSequence(seqCrcHWait);
         break;
     case seqCrcHWait:
-        mCrc16 = ((quint16)incoming)<<8;
-        if(payloadCrc()==mCrc16) deassemblePacket(mPayload); else setSequence(seqError);
+        mCrc16 += ((quint16)incoming)<<8;
+        if(payloadCrc()==mCrc16) deassemblePacket(mPayload);
+        else {
+            qDebug("BSLPacket::incomingByte crc error %02X %02X",payloadCrc(),mCrc16);
+            setSequence(seqError);
+        }
         break;
     default:
         qDebug("Invalid sequence state!!!");
@@ -90,7 +96,7 @@ bool BSLPacket::incomingByte(quint8 incoming) {
 }
 
 BSLCoreMessage *BSLPacket::reply() {
-    if(!mReply) mReply=new BSLPacket();
+    if(!mReply) mReply=new BSLCoreMessage();
     return (BSLCoreMessage *)mReply;
 }
 
@@ -117,7 +123,7 @@ void BSLPacket::deassemblePacket(const QByteArray &) {
 
 quint16 BSLPacket::payloadCrc() {
     quint16 crc16 = 0xFFFF;
-    for(int i=0;i<mPayload.size();i++) crcAddByte(mPayload.at(i));
+    for(int i=0;i<mPayload.size();i++) crc16=crcAddByte(crc16,mPayload.at(i));
     return crc16;
 }
 
@@ -125,6 +131,13 @@ void BSLPacket::crcAddByte(quint8 byte) {
     quint8 x = ((mCrc16>>8) ^ byte) & 0xff;
     x ^= x>>4;
     mCrc16 = (mCrc16 << 8) ^ (x << 12) ^ (x <<5) ^ x;
+}
+
+quint16 BSLPacket::crcAddByte(quint16 crc16, quint8 byte) {
+    quint8 x = ((crc16>>8) ^ byte) & 0xff;
+    x ^= x>>4;
+    crc16 = (crc16 << 8) ^ (x << 12) ^ (x <<5) ^ x;
+    return crc16;
 }
 
 void BSLPacket::clear() {

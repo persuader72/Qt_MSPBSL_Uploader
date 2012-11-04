@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     bslcorecommmand.cpp \
     bslrxpassword.cpp \
     bslsendpacketevent.cpp \
-    bslcoremessage.cpp
+    bslcoremessage.cpp \
+    bslrxdatablock.cpp
 
 HEADERS  += mainwindow.h \
     bootstraploader.h \
@@ -28,6 +29,7 @@ HEADERS  += mainwindow.h \
     bslcorecommmand.h \
     bslrxpassword.h \
     bslsendpacketevent.h \
-    bslcoremessage.h
+    bslcoremessage.h \
+    bslrxdatablock.h
 
 FORMS    += mainwindow.ui

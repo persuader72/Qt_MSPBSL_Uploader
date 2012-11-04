@@ -34,6 +34,7 @@
 
 #include "qextserialport.h"
 
+#include <QApplication>
 #include <QDebug>
 
 BootStrapLoader::BootStrapLoader(QObject *parent) : QThread(parent) {
@@ -57,6 +58,10 @@ void BootStrapLoader::setError(QString errorTitle, QString errorText) {
     emit errorRised(errorTitle,errorText);
 }
 
+void BootStrapLoader::doPostPacket(BSLPacket *packet) {
+    QApplication::instance()->postEvent( this, new BslSendPacketEvent( packet ) );
+}
+
 void BootStrapLoader::doQueuePacket(BSLPacket *packet) {
     mOutQueue.append(packet);
     tryToSend();
@@ -75,7 +80,7 @@ void BootStrapLoader::run() {
         exec();
         killTimer(timerid);
     } else {
-        setError("Serial Port",QString("Can't open serial port %1 error %s").arg(mSerialPortName).arg(mSerialPort->errorString().toAscii().constData()));
+        setError("Serial Port",QString("Can't open serial port %1 error %2").arg(mSerialPortName).arg(mSerialPort->errorString().toAscii().constData()));
     }
 
     qDebug("BootStrapLoader::run exited");
@@ -87,7 +92,7 @@ void BootStrapLoader::customEvent(QEvent *e) {
     if(e->type()==QEvent::User) {
         BslSendPacketEvent *ev=(BslSendPacketEvent *)e;
         mOutQueue.append(ev->packet());
-        tryToSend();
+        if(mOutPacket==NULL) tryToSend();
     }
 }
 
@@ -96,11 +101,25 @@ void BootStrapLoader::timerEvent(QTimerEvent *) {
     case serial:
         if(mOutPacket==NULL) {
             // Polling bootloader requesting version packet at 3Hz
-            if(mTimeout.elapsed()>5000) BSLPolling();
+            if(mTimeout.elapsed()>5000) {
+                qDebug("BootStrapLoader::timerEvent");
+                BSLPolling();
+            }
         } else {
             if(mTimeout.elapsed()>mOutPacket->timeout()) {
                qDebug("BootStrapLoader::timerEvent timeout for packet");
                mOutPacket=NULL;
+            }
+        }
+        break;
+    case bsl:
+        if(mOutPacket==NULL) {
+            // TODO Polling in connected state ????
+        } else {
+            if(mTimeout.elapsed()>mOutPacket->timeout()) {
+               qDebug("BootStrapLoader::timerEvent timeout for packet");
+               mOutPacket=NULL;
+               tryToSend();
             }
         }
         break;
@@ -113,12 +132,28 @@ void BootStrapLoader::on_SerialPort_ReadyRead() {
     quint8 incoming;
     while(mSerialPort->read((char *)&incoming,1)>0) {
         if(mOutPacket==NULL) {
-            qDebug("Data recevived but no packet active!!!");
+            qDebug("Data (%d) recevived but no packet active!!!",incoming);
         } else {
             if(mOutPacket->reply()->incomingByte(incoming)) {
                 mComplQueue.append(mOutPacket);
-                emit replyReceived(mOutPacket);
-                mOutPacket=NULL;
+
+                qDebug() << mState << mOutPacket->reply()->sequence() <<  mOutPacket->hasReply();
+
+                if(mState==serial && mOutPacket->hasReply()) {
+                    BSLCoreCommmand* coreCommand = dynamic_cast<BSLCoreCommmand*>(mOutPacket);
+                    if(coreCommand && coreCommand->command()==BSLCoreCommmand::txBslVersion) {
+                        mOutPacket=NULL;
+                        setState(bsl);
+                        stateChanged(mState);
+                    }
+                } else {
+
+                }
+
+                if(mOutPacket) {
+                    emit replyReceived(mOutPacket);
+                    mOutPacket=NULL;
+                }
             }
         }
     }

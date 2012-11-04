@@ -45,6 +45,7 @@ public:
     void setSequence(eSequence seq) { mSequence=seq; }
     int timeout() const { return mTimeout; }
     bool incomingByte(quint8 incoming);
+    bool hasReply() const { return mReply!=NULL && mReply->sequence()==seqDone; }
     const BSLCoreMessage *reply() const { return (const BSLCoreMessage *)mReply; }
     BSLCoreMessage *reply();
 public:
@@ -53,6 +54,7 @@ public:
 private:
     quint16 payloadCrc();
     void crcAddByte(quint8 byte);
+    quint16 crcAddByte(quint16 crc16,quint8 byte);
 private:
     void clear();
 private:

@@ -52,6 +52,8 @@ private slots:
 private slots:
     void on_FirmwareLoadButton_clicked();
     void on_SerialConnectButton_clicked();
+    void on_OperationStartButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     BootStrapLoader *mBsl;

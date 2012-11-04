@@ -9,7 +9,7 @@
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
 **
-** Nome-Programma is distributed in the hope that it will be useful,
+** Qt_MSPBSL_Uploader is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
@@ -39,7 +39,7 @@ struct QIntelHexMemSegment {
         address=addr;
     }
 
-    int lastAddress() { return address+memory.size(); }
+    int lastAddress() const { return address+memory.size(); }
 
     int address;
     QByteArray memory;
@@ -51,6 +51,8 @@ public:
     QIntelHexParser(const QString &filename);
     void parseFile(QIODevice &device);
     void parseFile(const QString &filename);
+    bool endOfFile() const { return mEndOfFile; }
+    const QList<QIntelHexMemSegment> &segments() const { return mSegments; }
 private:
     void handleRecord(quint8 recordType,quint16 address,QByteArray payload,int lineNum);
     quint8 decodeHexChar(QChar hex);

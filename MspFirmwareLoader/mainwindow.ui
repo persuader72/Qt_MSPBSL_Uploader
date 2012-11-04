@@ -16,86 +16,141 @@
   <widget class="QWidget" name="CentralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <layout class="QHBoxLayout" name="SerialPortLayout">
-      <item>
-       <widget class="QLabel" name="SerialPortNameLabel">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Select serial port:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="SerialPortNameEdit">
-        <property name="text">
-         <string>/dev/pts/3</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="SerialConnectButton">
-        <property name="text">
-         <string>&amp;Connect</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="FirmwareLayout">
-      <item>
-       <widget class="QLabel" name="FirmwareFileNameLabel">
-        <property name="text">
-         <string>Firmwre file: </string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="FirmwareSelectedFile"/>
-      </item>
-      <item>
-       <widget class="QPushButton" name="FirmwareLoadButton">
-        <property name="text">
-         <string>Load file</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <widget class="QWidget" name="CurrentOperationFrame" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
+     <widget class="QGroupBox" name="SerialPortGroup">
+      <property name="title">
+       <string>Serial Port</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <property name="spacing">
+        <number>2</number>
+       </property>
+       <property name="margin">
+        <number>2</number>
+       </property>
+       <item>
+        <layout class="QHBoxLayout" name="SerialPortLayout">
          <item>
-          <widget class="QLabel" name="label_2">
+          <widget class="QLabel" name="SerialPortNameLabel">
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>24</height>
+            </size>
+           </property>
            <property name="text">
-            <string>Current operation: Idle</string>
+            <string>Select serial port:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QProgressBar" name="progressBar">
-           <property name="value">
-            <number>0</number>
+          <widget class="QLineEdit" name="SerialPortNameEdit">
+           <property name="text">
+            <string>/dev/pts/2</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="SerialConnectButton">
+           <property name="text">
+            <string>&amp;Connect</string>
            </property>
           </widget>
          </item>
         </layout>
-       </widget>
-      </item>
-     </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="FirmwareGroup">
+      <property name="title">
+       <string>Firmware</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="spacing">
+        <number>2</number>
+       </property>
+       <property name="margin">
+        <number>2</number>
+       </property>
+       <item>
+        <layout class="QHBoxLayout" name="FirmwareLayout">
+         <item>
+          <widget class="QLabel" name="FirmwareFileNameLabel">
+           <property name="text">
+            <string>Firmwre file: </string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="FirmwareSelectedFile"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="FirmwareLoadButton">
+           <property name="text">
+            <string>Load file</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="OperationGroup">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="title">
+       <string>Current Operation</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <property name="spacing">
+        <number>2</number>
+       </property>
+       <property name="margin">
+        <number>2</number>
+       </property>
+       <item>
+        <layout class="QHBoxLayout" name="OperationLayout">
+         <item>
+          <widget class="QWidget" name="CurrentOperationFrame" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QLabel" name="OperationStatus">
+              <property name="text">
+               <string>Current operation: Idle</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QProgressBar" name="OperationProgressBar">
+              <property name="value">
+               <number>0</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="OperationStartButton">
+              <property name="text">
+               <string>Upload Firmware</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
     </item>
     <item>
      <widget class="QWidget" name="widget" native="true">

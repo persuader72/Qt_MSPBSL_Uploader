@@ -29,7 +29,11 @@
 
 #include "bslrxpassword.h"
 
-BSLRxPassword::BSLRxPassword(QByteArray password) : BSLCoreCommmand(0x11,0x00) {
+BSLRxPassword::BSLRxPassword() : BSLCoreCommmand(rxPassword,NULL_ADDRESS) {
+    mPassword=QByteArray(16,0xFF);
+}
+
+BSLRxPassword::BSLRxPassword(QByteArray password) : BSLCoreCommmand(rxPassword,NULL_ADDRESS) {
     mPassword=password;
 }
 

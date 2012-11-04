@@ -47,6 +47,7 @@ public:
     void setError(QString errorTitle,QString errorText);
     void setPortName(const QString &portname) { mSerialPortName=portname; }
 public:
+    void doPostPacket(BSLPacket *packet);
     void doQueuePacket(BSLPacket *packet);
 protected:
     virtual void run();
