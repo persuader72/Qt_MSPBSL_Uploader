@@ -103,7 +103,7 @@ void MainWindow::onBslReplyReceived(BSLPacket *packet) {
 }
 
 void MainWindow::on_FirmwareLoadButton_clicked() {
-    QString fn=QFileDialog::getOpenFileName(this,"Select intel hex firmware file","","*.hex");
+    QString fn=QFileDialog::getOpenFileName(this,"Select intel hex firmware file","","*.hex *.ihex");
     if(!fn.isNull()) {
         QFile f(fn);
         ui->FirmwareSelectedFile->setText(fn);
