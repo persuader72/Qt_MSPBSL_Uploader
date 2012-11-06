@@ -134,15 +134,17 @@ void MainWindow::on_OperationStartButton_clicked() {
     }
 
     BSLPacket *pkt;
-
+    // Intialize progress bar
+    ui->OperationProgressBar->setValue(0);
+    ui->OperationProgressBar->setMaximum(blocks);
     // Set BSL as working this will update UI status
     mBsl->setState(BootStrapLoader::working);
     // Bulk erase and unlink bsl
     pkt = new BSLCoreCommmand(BSLCoreCommmand::massErase,BSLCoreCommmand::NULL_ADDRESS);
-    pkt->setExtraData(((block++)*1000)/blocks,0,0);
+    pkt->setExtraData(block++,0,0);
     mBsl->doPostPacket(pkt);
     pkt = new BSLRxPassword();
-    pkt->setExtraData(((block++)*1000)/blocks,0,0);
+    pkt->setExtraData(block++,0,0);
     mBsl->doPostPacket(pkt);
     // Send memory segments as 32bytes blocks
     for(int i=0;i<parser.segments().count();i++) {
@@ -150,7 +152,7 @@ void MainWindow::on_OperationStartButton_clicked() {
         const QIntelHexMemSegment &segment = parser.segments().at(i);
         for(;j<segment.memory.size();j+=32) {
             pkt = new BSLRxDataBlock(segment.address+j,segment.memory.mid(j,32));
-            pkt->setExtraData(((block++)*1000)/blocks,0,0);
+            pkt->setExtraData(block++,0,0);
             mBsl->doPostPacket(pkt);
         }
         qDebug() << j << segment.memory.size();
