@@ -41,9 +41,9 @@ const QByteArray BSLCoreCommmand::assemblePacket() {
     int i=0;
     mPayload[i++]=mCommand;
     if((mAddress&0xFF000000)==0) {
-        mPayload[i++]=(quint8)((mAddress&0xFF0000)>>16);
-        mPayload[i++]=(quint8)((mAddress&0x00FF00)>>8);
         mPayload[i++]=(quint8)(mAddress&0x0000FF);
+        mPayload[i++]=(quint8)((mAddress&0x00FF00)>>8);
+        mPayload[i++]=(quint8)((mAddress&0xFF0000)>>16);
     }
     for(int j=0;j<mCoreCommmandPayload.size();j++) mPayload[i++]=mCoreCommmandPayload.at(j);
 

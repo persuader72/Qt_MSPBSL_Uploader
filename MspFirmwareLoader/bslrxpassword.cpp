@@ -30,7 +30,7 @@
 #include "bslrxpassword.h"
 
 BSLRxPassword::BSLRxPassword() : BSLCoreCommmand(rxPassword,NULL_ADDRESS) {
-    mPassword=QByteArray(16,0xFF);
+    mPassword=QByteArray(32,0xFF);
 }
 
 BSLRxPassword::BSLRxPassword(QByteArray password) : BSLCoreCommmand(rxPassword,NULL_ADDRESS) {

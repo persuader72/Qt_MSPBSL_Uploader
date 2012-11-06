@@ -34,14 +34,18 @@
 
 class BSLCoreMessage : public BSLPacket {
 public:
+    enum {DataBlock=0x3A,Message=0x3B};
+public:
     BSLCoreMessage();
     quint8 command() const { return mCommand; }
-    const QByteArray &message() const { return mMessage; }
+    quint8 message() const { return mMessage; }
+    const QByteArray &dataBlock() const { return mDataBlock; }
 protected:
     virtual void deassemblePacket(const QByteArray &payload);
 private:
     quint8 mCommand;
-    QByteArray mMessage;
+    quint8 mMessage;
+    QByteArray mDataBlock;
 };
 
 #endif // BSLCOREMESSAGE_H

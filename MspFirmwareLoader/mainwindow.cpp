@@ -80,7 +80,15 @@ void MainWindow::onBslErrorRised(const QString &title, const QString &text) {
 void MainWindow::onBslReplyReceived(BSLPacket *packet) {
     qDebug("MainWindow::onBslReplyReceived");
     if(packet->reply()) {
-        qDebug("MainWindow::onBslReplyReceived %d",packet->reply()->command());
+        switch(packet->reply()->command()) {
+        case BSLCoreMessage::Message:
+            qDebug("MainWindow::onBslReplyReceived Message: %02X",packet->reply()->message());
+            break;
+        case BSLCoreMessage::DataBlock:
+            qDebug("MainWindow::onBslReplyReceived DataBlock: %s",packet->reply()->dataBlock().toHex().constData());
+            break;
+        }
+
     }
 }
 

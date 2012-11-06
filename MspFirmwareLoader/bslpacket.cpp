@@ -43,7 +43,7 @@ BSLPacket::~BSLPacket() {
 }
 
 bool BSLPacket::incomingByte(quint8 incoming) {
-    //qDebug("BSLPacket::incomingByte %d %d %02X",mSequence,mLength,incoming);
+    qDebug("BSLPacket::incomingByte %d %d %02X",mSequence,mLength,incoming);
 
     switch(sequence()) {
     case seqAckWait:

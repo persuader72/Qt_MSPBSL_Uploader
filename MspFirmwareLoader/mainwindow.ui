@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>562</width>
-    <height>386</height>
+    <width>517</width>
+    <height>349</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Qt_MSPBSL_Uploader</string>
   </property>
   <widget class="QWidget" name="CentralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -19,6 +19,9 @@
      <widget class="QGroupBox" name="SerialPortGroup">
       <property name="title">
        <string>Serial Port</string>
+      </property>
+      <property name="checkable">
+       <bool>false</bool>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <property name="spacing">
@@ -45,7 +48,7 @@
          <item>
           <widget class="QLineEdit" name="SerialPortNameEdit">
            <property name="text">
-            <string>/dev/pts/2</string>
+            <string>/dev/ttyUSB0</string>
            </property>
           </widget>
          </item>
@@ -59,6 +62,13 @@
         </layout>
        </item>
       </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
      </widget>
     </item>
     <item>
@@ -95,6 +105,13 @@
         </layout>
        </item>
       </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="Line" name="line_2">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
      </widget>
     </item>
     <item>
@@ -169,7 +186,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>562</width>
+     <width>517</width>
      <height>25</height>
     </rect>
    </property>

@@ -68,6 +68,10 @@ void BootStrapLoader::doQueuePacket(BSLPacket *packet) {
 }
 
 void BootStrapLoader::run() {
+    mTimer = new QTimer();
+    mTimer->setInterval(50);
+    connect(mTimer,SIGNAL(timeout()),this,SLOT(on_Timer_Timeout()));
+
     mSerialPort = new QextSerialPort();
     mSerialPort->setPortName(mSerialPortName);
     mSerialPort->setBaudRate(BAUD9600);
@@ -75,10 +79,10 @@ void BootStrapLoader::run() {
 
 
     if(mSerialPort->open(QIODevice::ReadWrite)) {
-        int timerid=startTimer(50);
+        mTimer->start(50);
         setState(serial);
         exec();
-        killTimer(timerid);
+        mTimer->stop();
     } else {
         setError("Serial Port",QString("Can't open serial port %1 error %2").arg(mSerialPortName).arg(mSerialPort->errorString().toAscii().constData()));
     }
@@ -86,6 +90,7 @@ void BootStrapLoader::run() {
     qDebug("BootStrapLoader::run exited");
     if(mSerialPort->isOpen()) mSerialPort->close();
     delete mSerialPort;
+    delete mTimer;
 }
 
 void BootStrapLoader::customEvent(QEvent *e) {
@@ -153,10 +158,15 @@ void BootStrapLoader::on_SerialPort_ReadyRead() {
                 if(mOutPacket) {
                     emit replyReceived(mOutPacket);
                     mOutPacket=NULL;
+                    tryToSend();
                 }
             }
         }
     }
+}
+
+void BootStrapLoader::on_Timer_Timeout() {
+    timerEvent(NULL);
 }
 
 void BootStrapLoader::BSLPolling() {
@@ -180,12 +190,22 @@ void BootStrapLoader::tryToSend() {
         case BSLPacket::seqIdle:
             mTimeout.start();
             mOutPacket->setSequence(BSLPacket::seqAckWait);
-            qDebug() << mOutPacket->assemblePacket().toHex();
-            mSerialPort->write(mOutPacket->assemblePacket());
+            qDebug() << escapeSharp(mOutPacket->assemblePacket().toHex());
+            mSerialPort->write(escapeSharp(mOutPacket->assemblePacket()));
             break;
         default:
             qDebug("Packet already sent!!!");
             break;
         }
+    }
+}
+
+QByteArray BootStrapLoader::escapeSharp(const QByteArray &input) {
+    int count;
+    if((count=input.count('#'))==0) return input;
+    else {
+        QByteArray output = input;
+        output.replace('#',QByteArray(2,'#'));
+        return output;
     }
 }

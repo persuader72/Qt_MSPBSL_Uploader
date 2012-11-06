@@ -35,13 +35,14 @@ BSLCoreMessage::BSLCoreMessage() {
 }
 
 void BSLCoreMessage::deassemblePacket(const QByteArray &payload) {
-    qDebug() << "BSLCoreMessage::deassemblePacket" << payload;
+    //qDebug() << "BSLCoreMessage::deassemblePacket" << payload;
     if(mPayload.size()==0) {
         setSequence(seqError);
         return;
     }
 
     mCommand=payload.at(0);
-    if(mPayload.size()>1) mMessage=mPayload.right(mPayload.size()-1);
+    if(mCommand==Message && payload.size()>1) mMessage = (quint8)payload.at(1);
+    if(mCommand==DataBlock && mPayload.size()>1) mDataBlock=mPayload.right(mPayload.size()-1);
     setSequence(seqDone);
 }

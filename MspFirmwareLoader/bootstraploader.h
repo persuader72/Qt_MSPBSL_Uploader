@@ -32,6 +32,7 @@
 
 #include <QThread>
 #include <QTime>
+#include <QTimer>
 #include "bslpacket.h"
 
 class QextSerialPort;
@@ -55,9 +56,11 @@ protected:
     virtual void timerEvent(QTimerEvent *);
 private slots:
     void on_SerialPort_ReadyRead();
+    void on_Timer_Timeout();
 private:
     void BSLPolling();
     void tryToSend();
+    QByteArray escapeSharp(const QByteArray &input);
 private:
     bslState mState;
 private:
@@ -68,6 +71,7 @@ private:
     //BSLPacket mIncomingPacket;
 private:
     QTime mTimeout;
+    QTimer *mTimer;
     BSLPacket *mOutPacket;
     QList<BSLPacket *> mOutQueue;
     QList<BSLPacket *> mComplQueue;
