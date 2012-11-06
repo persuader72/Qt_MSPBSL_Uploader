@@ -33,6 +33,7 @@
 #include <QMainWindow>
 #include "bootstraploader.h"
 #include "qintelhexparser.h"
+#include "serialplugininterface.h"
 
 namespace Ui {
 class MainWindow;
@@ -53,7 +54,9 @@ private slots:
     void on_FirmwareLoadButton_clicked();
     void on_SerialConnectButton_clicked();
     void on_OperationStartButton_clicked();
-
+private:
+    void loadPlugins();
+    SerialPluginInterface *mSerialPlugin;
 private:
     Ui::MainWindow *ui;
     BootStrapLoader *mBsl;

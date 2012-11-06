@@ -36,10 +36,11 @@
 #include "bslpacket.h"
 
 class QextSerialPort;
+class SerialPluginInterface;
 class BootStrapLoader : public QThread {
     Q_OBJECT
 public:
-    enum bslState { idle,serial,bsl,working };
+    enum bslState { idle,serial,afterConnect,bsl,working,beforeConnect };
     explicit BootStrapLoader(QObject *parent = 0);
     virtual ~BootStrapLoader();
 public:
@@ -47,22 +48,19 @@ public:
     void setState(bslState state);
     void setError(QString errorTitle,QString errorText);
     void setPortName(const QString &portname) { mSerialPortName=portname; }
+    void setSerialPlugin(SerialPluginInterface *plugin) { mSerialPlugin=plugin; }
 public:
     void doPostPacket(BSLPacket *packet);
     void doQueuePacket(BSLPacket *packet);
 protected:
     virtual void run();
     virtual void customEvent(QEvent * e);
-    virtual void timerEvent(QTimerEvent *);
 private slots:
     void on_SerialPort_ReadyRead();
     void on_Timer_Timeout();
 private:
     void BSLPolling();
     void tryToSend();
-#ifdef CBL_FPGA_ENABLED
-    QByteArray escapeSharp(const QByteArray &input);
-#endif
 private:
     bslState mState;
 private:
@@ -78,6 +76,8 @@ private:
     QList<BSLPacket *> mOutQueue;
     QList<BSLPacket *> mComplQueue;
     BSLPacket *mPollPacket;
+private:
+    SerialPluginInterface *mSerialPlugin;
 signals:
     void stateChanged(int state);
     void errorRised(const QString &title,const QString &text);

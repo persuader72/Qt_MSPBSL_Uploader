@@ -30,6 +30,7 @@ HEADERS  += mainwindow.h \
     bslrxpassword.h \
     bslsendpacketevent.h \
     bslcoremessage.h \
-    bslrxdatablock.h
+    bslrxdatablock.h \
+    serialplugininterface.h
 
 FORMS    += mainwindow.ui

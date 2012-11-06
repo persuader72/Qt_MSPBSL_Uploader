@@ -1,3 +1,4 @@
 
 TEMPLATE = subdirs
-SUBDIRS += MspFirmwareLoader
+SUBDIRS += MspFirmwareLoader \
+    plugins

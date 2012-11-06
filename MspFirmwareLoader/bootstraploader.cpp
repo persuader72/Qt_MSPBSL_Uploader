@@ -31,7 +31,7 @@
 #include "bslsendpacketevent.h"
 #include "bslcorecommmand.h"
 #include "bslcoremessage.h"
-
+#include "serialplugininterface.h"
 #include "qextserialport.h"
 
 #include <QApplication>
@@ -44,6 +44,7 @@ BootStrapLoader::BootStrapLoader(QObject *parent) : QThread(parent) {
     // BSL Packt used to detect bsl (tx version)
     mPollPacket= new BSLCoreCommmand(0x19,BSLCoreCommmand::NULL_ADDRESS);
     mOutPacket=NULL;
+    mSerialPlugin=NULL;
 }
 
 BootStrapLoader::~BootStrapLoader() {
@@ -102,38 +103,6 @@ void BootStrapLoader::customEvent(QEvent *e) {
     }
 }
 
-void BootStrapLoader::timerEvent(QTimerEvent *) {
-    switch(mState) {
-    case serial:
-        if(mOutPacket==NULL) {
-            // Polling bootloader requesting version packet at 3Hz
-            if(mTimeout.elapsed()>5000) {
-                qDebug("BootStrapLoader::timerEvent");
-                BSLPolling();
-            }
-        } else {
-            if(mTimeout.elapsed()>mOutPacket->timeout()) {
-               qDebug("BootStrapLoader::timerEvent timeout for packet");
-               mOutPacket=NULL;
-            }
-        }
-        break;
-    case bsl:
-        if(mOutPacket==NULL) {
-            // TODO Polling in connected state ????
-        } else {
-            if(mTimeout.elapsed()>mOutPacket->timeout()) {
-               qDebug("BootStrapLoader::timerEvent timeout for packet");
-               mOutPacket=NULL;
-               tryToSend();
-            }
-        }
-        break;
-    default:
-        break;
-    }
-}
-
 void BootStrapLoader::on_SerialPort_ReadyRead() {
     quint8 incoming;
     while(mSerialPort->read((char *)&incoming,1)>0) {
@@ -167,7 +136,35 @@ void BootStrapLoader::on_SerialPort_ReadyRead() {
 }
 
 void BootStrapLoader::on_Timer_Timeout() {
-    timerEvent(NULL);
+    switch(mState) {
+    case serial:
+        if(mOutPacket==NULL) {
+            // Polling bootloader requesting version packet at 3Hz
+            if(mTimeout.elapsed()>5000) {
+                qDebug("BootStrapLoader::timerEvent");
+                BSLPolling();
+            }
+        } else {
+            if(mTimeout.elapsed()>mOutPacket->timeout()) {
+               qDebug("BootStrapLoader::timerEvent timeout for packet");
+               mOutPacket=NULL;
+            }
+        }
+        break;
+    case bsl:
+        if(mOutPacket==NULL) {
+            // TODO Polling in connected state ????
+        } else {
+            if(mTimeout.elapsed()>mOutPacket->timeout()) {
+               qDebug("BootStrapLoader::timerEvent timeout for packet");
+               mOutPacket=NULL;
+               tryToSend();
+            }
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 void BootStrapLoader::BSLPolling() {
@@ -191,13 +188,13 @@ void BootStrapLoader::tryToSend() {
         case BSLPacket::seqIdle:
             mTimeout.start();
             mOutPacket->setSequence(BSLPacket::seqAckWait);
-#ifdef CBL_FPGA_ENABLED
-            qDebug() << escapeSharp(mOutPacket->assemblePacket().toHex());
-            mSerialPort->write(escapeSharp(mOutPacket->assemblePacket()));
-#else
-            qDebug() << mOutPacket->assemblePacket().toHex();
-            mSerialPort->write(mOutPacket->assemblePacket());
-#endif
+            if(mSerialPlugin && mSerialPlugin->hasEscapeOutput())  {
+                qDebug() << mSerialPlugin->escapeOutput(mOutPacket->assemblePacket().toHex());
+                mSerialPort->write(mSerialPlugin->escapeOutput(mOutPacket->assemblePacket()));
+            } else {
+                qDebug() << mOutPacket->assemblePacket().toHex();
+                mSerialPort->write(mOutPacket->assemblePacket());
+            }
             break;
         default:
             qDebug("Packet already sent!!!");
@@ -208,14 +205,3 @@ void BootStrapLoader::tryToSend() {
     }
 }
 
-#ifdef CBL_FPGA_ENABLED
-QByteArray BootStrapLoader::escapeSharp(const QByteArray &input) {
-    int count;
-    if((count=input.count('#'))==0) return input;
-    else {
-        QByteArray output = input;
-        output.replace('#',QByteArray(2,'#'));
-        return output;
-    }
-}
-#endif

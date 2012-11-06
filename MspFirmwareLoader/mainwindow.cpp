@@ -36,6 +36,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QProgressBar>
+#include <QPluginLoader>
 
 #include "bslsendpacketevent.h"
 #include "bslrxpassword.h"
@@ -45,7 +46,17 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWindow) {
     ui->setupUi(this);
+
+    loadPlugins();
+    if(!mSerialPlugin) {
+        qDebug("MainWindow::MainWindow Could not load the plugin");
+    } else {
+        qDebug("MainWindow::MainWindow Loaded Plugin %s",mSerialPlugin->pluginName().toAscii().constData());
+    }
+
     mBsl = new BootStrapLoader(this);
+    if(mSerialPlugin) mBsl->setSerialPlugin(mSerialPlugin);
+
     connect(mBsl,SIGNAL(stateChanged(int)),this,SLOT(onBslStateChanged(int)));
     connect(mBsl,SIGNAL(errorRised(QString,QString)),SLOT(onBslErrorRised(QString,QString)));
     connect(mBsl,SIGNAL(replyReceived(BSLPacket*)),this,SLOT(onBslReplyReceived(BSLPacket*)));
@@ -158,4 +169,22 @@ void MainWindow::on_OperationStartButton_clicked() {
         qDebug() << j << segment.memory.size();
     }
 
+}
+
+void MainWindow::loadPlugins() {
+    mSerialPlugin=NULL;
+
+     QDir pluginsDir(qApp->applicationDirPath());
+#if defined(Q_OS_WIN)
+     if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release") pluginsDir.cdUp();
+#endif
+     pluginsDir.cdUp();
+     pluginsDir.cd("plugins");
+     foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
+        QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
+        QObject *plugin = pluginLoader.instance();
+        if(plugin) {
+            mSerialPlugin = qobject_cast<SerialPluginInterface *>(plugin);
+        }
+     }
 }
