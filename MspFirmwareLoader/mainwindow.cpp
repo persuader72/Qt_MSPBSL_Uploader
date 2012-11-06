@@ -35,6 +35,7 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QProgressBar>
 
 #include "bslsendpacketevent.h"
 #include "bslrxpassword.h"
@@ -65,10 +66,16 @@ void MainWindow::onBslStateChanged(int state) {
     qDebug("MainWindow::onBslStateChanged %d",state);
     switch(state) {
     case BootStrapLoader::serial:
-        ui->SerialPortGroup->setEnabled(false);
+        ui->SerialConnectButton->setText("Disconnect");
+        ui->SerialPortGroup->setEnabled(true);
         break;
     case BootStrapLoader::bsl:
+        ui->SerialPortGroup->setEnabled(true);
         if(parser.endOfFile()) ui->OperationGroup->setEnabled(true);
+        break;
+    case BootStrapLoader::working:
+        ui->SerialPortGroup->setEnabled(false);
+        ui->OperationGroup->setEnabled(false);
         break;
     }
 }
@@ -83,6 +90,9 @@ void MainWindow::onBslReplyReceived(BSLPacket *packet) {
         switch(packet->reply()->command()) {
         case BSLCoreMessage::Message:
             qDebug("MainWindow::onBslReplyReceived Message: %02X",packet->reply()->message());
+            if(packet->extraData1()!=-1) {
+                ui->OperationProgressBar->setValue(packet->extraData1());
+            }
             break;
         case BSLCoreMessage::DataBlock:
             qDebug("MainWindow::onBslReplyReceived DataBlock: %s",packet->reply()->dataBlock().toHex().constData());
@@ -118,14 +128,30 @@ void MainWindow::on_SerialConnectButton_clicked() {
 }
 
 void MainWindow::on_OperationStartButton_clicked() {
-    mBsl->doPostPacket(new BSLCoreCommmand(BSLCoreCommmand::massErase,BSLCoreCommmand::NULL_ADDRESS));
-    mBsl->doPostPacket(new BSLRxPassword());
+    int blocks=2,block=0;
+    foreach(const QIntelHexMemSegment &segment, parser.segments()) {
+        blocks += segment.memory.size() / 32;
+    }
 
+    BSLPacket *pkt;
+
+    // Set BSL as working this will update UI status
+    mBsl->setState(BootStrapLoader::working);
+    // Bulk erase and unlink bsl
+    pkt = new BSLCoreCommmand(BSLCoreCommmand::massErase,BSLCoreCommmand::NULL_ADDRESS);
+    pkt->setExtraData((blocks*1000)/(block++),0,0);
+    mBsl->doPostPacket(pkt);
+    pkt = new BSLRxPassword();
+    pkt->setExtraData((blocks*1000)/(block++),0,0);
+    mBsl->doPostPacket(pkt);
+    // Send memory segments as 32bytes blocks
     for(int i=0;i<parser.segments().count();i++) {
         int j=0;
         const QIntelHexMemSegment &segment = parser.segments().at(i);
         for(;j<segment.memory.size();j+=32) {
-            mBsl->doPostPacket(new BSLRxDataBlock(segment.address+j,segment.memory.mid(j,32)));
+            pkt = new BSLRxDataBlock(segment.address+j,segment.memory.mid(j,32));
+            pkt->setExtraData((blocks*1000)/(block++),0,0);
+            mBsl->doPostPacket(pkt);
         }
         qDebug() << j << segment.memory.size();
     }

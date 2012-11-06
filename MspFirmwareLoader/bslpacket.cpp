@@ -35,6 +35,9 @@ BSLPacket::BSLPacket()  {
     // 100ms default timeout
     mTimeout=4000;
     mReply=NULL;
+    mExtraData1=-1;
+    mExtraData2=-1;
+    mExtraData3=-1;
     clear();
 }
 
@@ -43,7 +46,7 @@ BSLPacket::~BSLPacket() {
 }
 
 bool BSLPacket::incomingByte(quint8 incoming) {
-    qDebug("BSLPacket::incomingByte %d %d %02X",mSequence,mLength,incoming);
+    //qDebug("BSLPacket::incomingByte %d %d %02X",mSequence,mLength,incoming);
 
     switch(sequence()) {
     case seqAckWait:

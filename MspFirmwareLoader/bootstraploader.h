@@ -60,7 +60,9 @@ private slots:
 private:
     void BSLPolling();
     void tryToSend();
+#ifdef CBL_FPGA_ENABLED
     QByteArray escapeSharp(const QByteArray &input);
+#endif
 private:
     bslState mState;
 private:

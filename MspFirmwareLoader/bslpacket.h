@@ -48,6 +48,10 @@ public:
     bool hasReply() const { return mReply!=NULL && mReply->sequence()==seqDone; }
     const BSLCoreMessage *reply() const { return (const BSLCoreMessage *)mReply; }
     BSLCoreMessage *reply();
+    void setExtraData(int e1, int e2, int e3) { mExtraData1=e1; mExtraData1=e2; mExtraData1=e3; }
+    int extraData1() const { return mExtraData1; }
+    int extraData2() const { return mExtraData2; }
+    int extraData3() const { return mExtraData3; }
 public:
     virtual const QByteArray assemblePacket();
     virtual void deassemblePacket(const QByteArray &);
@@ -67,6 +71,10 @@ private:
     quint16 mCrc16;
 private:
     BSLPacket *mReply;
+private:
+    int mExtraData1;
+    int mExtraData2;
+    int mExtraData3;
 };
 
 #endif // BSLPACKET_H

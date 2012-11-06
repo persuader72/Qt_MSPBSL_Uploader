@@ -43,6 +43,7 @@ BootStrapLoader::BootStrapLoader(QObject *parent) : QThread(parent) {
     mSerialPort=NULL;
     // BSL Packt used to detect bsl (tx version)
     mPollPacket= new BSLCoreCommmand(0x19,BSLCoreCommmand::NULL_ADDRESS);
+    mOutPacket=NULL;
 }
 
 BootStrapLoader::~BootStrapLoader() {
@@ -190,16 +191,24 @@ void BootStrapLoader::tryToSend() {
         case BSLPacket::seqIdle:
             mTimeout.start();
             mOutPacket->setSequence(BSLPacket::seqAckWait);
+#ifdef CBL_FPGA_ENABLED
             qDebug() << escapeSharp(mOutPacket->assemblePacket().toHex());
             mSerialPort->write(escapeSharp(mOutPacket->assemblePacket()));
+#else
+            qDebug() << mOutPacket->assemblePacket().toHex();
+            mSerialPort->write(mOutPacket->assemblePacket());
+#endif
             break;
         default:
             qDebug("Packet already sent!!!");
             break;
         }
+    } else {
+        if(state()==working) setState(bsl);
     }
 }
 
+#ifdef CBL_FPGA_ENABLED
 QByteArray BootStrapLoader::escapeSharp(const QByteArray &input) {
     int count;
     if((count=input.count('#'))==0) return input;
@@ -209,3 +218,4 @@ QByteArray BootStrapLoader::escapeSharp(const QByteArray &input) {
         return output;
     }
 }
+#endif
