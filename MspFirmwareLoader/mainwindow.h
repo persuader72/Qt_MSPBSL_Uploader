@@ -31,6 +31,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "qextserialenumerator.h"
 #include "bootstraploader.h"
 #include "qintelhexparser.h"
 #include "serialplugininterface.h"
@@ -61,6 +62,9 @@ private:
     Ui::MainWindow *ui;
     BootStrapLoader *mBsl;
     QIntelHexParser parser;
+    QextSerialEnumerator mSerialEnum;
 };
 
 #endif // MAINWINDOW_H
+
+

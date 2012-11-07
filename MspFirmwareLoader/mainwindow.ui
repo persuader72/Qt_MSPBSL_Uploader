@@ -46,9 +46,9 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="SerialPortNameEdit">
-           <property name="text">
-            <string>/dev/ttyUSB0</string>
+          <widget class="QComboBox" name="SerialPortNameCombo">
+           <property name="editable">
+            <bool>true</bool>
            </property>
           </widget>
          </item>

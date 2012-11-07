@@ -1,8 +1,17 @@
 #include "mymoteserialplugin.h"
+#include "qextserialport.h"
 #include <QtCore/qplugin.h>
 
 QString MyMoteSerialPlugin::pluginName() {
     return QString("MyMoteSerialPlugin");
+}
+
+BootStrapLoader::bslState MyMoteSerialPlugin::timerTimeout(BootStrapLoader::bslState state) {
+    switch(state) {
+    default:
+        break;
+    }
+    return state;
 }
 
 QByteArray MyMoteSerialPlugin::escapeOutput(const QByteArray &output) {
@@ -22,6 +31,7 @@ BootStrapLoader::bslState MyMoteSerialPlugin::incomingByte(quint8 byte) {
 
 BootStrapLoader::bslState MyMoteSerialPlugin::afterSerialConnect() {
     QByteArray string("#U#U:05000615000100.#Q");
+    mSerialPort->write(string);
     return BootStrapLoader::afterConnect;
 }
 

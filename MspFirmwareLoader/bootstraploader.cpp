@@ -52,8 +52,10 @@ BootStrapLoader::~BootStrapLoader() {
 }
 
 void BootStrapLoader::setState(BootStrapLoader::bslState state) {
-    mState=state;
-    emit stateChanged(mState);
+    if(mState!=state) {
+        mState=state;
+        emit stateChanged(mState);
+    }
 }
 
 void BootStrapLoader::setError(QString errorTitle, QString errorText) {
@@ -78,7 +80,7 @@ void BootStrapLoader::run() {
     mSerialPort->setPortName(mSerialPortName);
     mSerialPort->setBaudRate(BAUD9600);
     connect(mSerialPort,SIGNAL(readyRead()),this,SLOT(on_SerialPort_ReadyRead()));
-
+    if(mSerialPlugin) mSerialPlugin->setSerialPort(mSerialPort);
 
     if(mSerialPort->open(QIODevice::ReadWrite)) {
         mTimer->start(50);
@@ -151,6 +153,9 @@ void BootStrapLoader::on_Timer_Timeout() {
             }
         }
         break;
+    case afterConnect:
+        if(mSerialPlugin) setState(mSerialPlugin->timerTimeout(mState));
+        break;
     case bsl:
         if(mOutPacket==NULL) {
             // TODO Polling in connected state ????
@@ -161,6 +166,9 @@ void BootStrapLoader::on_Timer_Timeout() {
                tryToSend();
             }
         }
+        break;
+    case beforeConnect:
+        if(mSerialPlugin) setState(mSerialPlugin->timerTimeout(mState));
         break;
     default:
         break;

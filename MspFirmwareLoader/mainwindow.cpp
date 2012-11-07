@@ -54,6 +54,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
         qDebug("MainWindow::MainWindow Loaded Plugin %s",mSerialPlugin->pluginName().toAscii().constData());
     }
 
+    QextPortInfo serinfo;
+    QStringList result;
+    QList<QextPortInfo> serials = QextSerialEnumerator::getPorts();
+    foreach(serinfo,serials) {
+        result.append(serinfo.physName);
+        qDebug() << serinfo.physName << serinfo.physName << serinfo.enumName << serinfo.friendName;
+    }
+
+    result.sort();
+    ui->SerialPortNameCombo->addItems(result);
+
     mBsl = new BootStrapLoader(this);
     if(mSerialPlugin) mBsl->setSerialPlugin(mSerialPlugin);
 
@@ -76,6 +87,10 @@ void MainWindow::timerEvent(QTimerEvent *) {
 void MainWindow::onBslStateChanged(int state) {
     qDebug("MainWindow::onBslStateChanged %d",state);
     switch(state) {
+    case BootStrapLoader::idle:
+        ui->SerialConnectButton->setText("Connect");
+        ui->SerialPortGroup->setEnabled(true);
+        ui->OperationGroup->setEnabled(false);
     case BootStrapLoader::serial:
         ui->SerialConnectButton->setText("Disconnect");
         ui->SerialPortGroup->setEnabled(true);
@@ -131,9 +146,10 @@ void MainWindow::on_FirmwareLoadButton_clicked() {
 
 void MainWindow::on_SerialConnectButton_clicked() {
     if(mBsl->isRunning()) {
-        QMessageBox::warning(this,"Open Serial Port error","Serial port is already opened!");
+        mBsl->terminate();
+        mBsl->wait();
     } else {
-        mBsl->setPortName(ui->SerialPortNameEdit->text());
+        mBsl->setPortName(ui->SerialPortNameCombo->currentText());
         mBsl->start();
     }
 }

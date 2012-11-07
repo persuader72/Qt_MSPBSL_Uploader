@@ -1,6 +1,6 @@
 TEMPLATE        = lib
 CONFIG         += plugin
-INCLUDEPATH    += ../../MspFirmwareLoader
+INCLUDEPATH    += ../../MspFirmwareLoader ../../MspFirmwareLoader/3rdparty/qextserialport/src
 TARGET          = $$qtLibraryTarget(mymoteserialplugin)
 DESTDIR         = ../../plugins
 

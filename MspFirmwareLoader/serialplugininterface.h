@@ -7,6 +7,8 @@ class SerialPluginInterface {
 public:
     virtual ~SerialPluginInterface() {}
     virtual QString pluginName() = 0;
+    virtual void setSerialPort(QextSerialPort *serialport) = 0;
+    virtual BootStrapLoader::bslState timerTimeout(BootStrapLoader::bslState state) =0;
 
     virtual bool hasEscapeOutput() = 0;
     virtual QByteArray escapeOutput(const QByteArray &output) = 0;
