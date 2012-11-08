@@ -57,10 +57,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
     QextPortInfo serinfo;
     QStringList result;
     QList<QextPortInfo> serials = QextSerialEnumerator::getPorts();
-    foreach(serinfo,serials) {
-        result.append(serinfo.physName);
-        qDebug() << serinfo.physName << serinfo.physName << serinfo.enumName << serinfo.friendName;
-    }
+    foreach(serinfo,serials) result.append(serinfo.physName);
 
     result.sort();
     ui->SerialPortNameCombo->addItems(result);
