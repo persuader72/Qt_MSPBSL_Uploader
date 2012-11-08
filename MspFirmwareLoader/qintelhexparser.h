@@ -52,6 +52,7 @@ public:
     void parseFile(QIODevice &device);
     void parseFile(const QString &filename);
     bool endOfFile() const { return mEndOfFile; }
+    int sumTotalMemory() const;
     const QList<QIntelHexMemSegment> &segments() const { return mSegments; }
 private:
     void handleRecord(quint8 recordType,quint16 address,QByteArray payload,int lineNum);

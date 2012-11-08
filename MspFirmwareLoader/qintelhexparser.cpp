@@ -110,6 +110,12 @@ void QIntelHexParser::parseFile(const QString &filename) {
     }
 }
 
+int QIntelHexParser::sumTotalMemory() const {
+    int mem=0;
+    for(int i=0;i<mSegments.count();i++) mem += mSegments.at(i).memory.size();
+    return mem;
+}
+
 void QIntelHexParser::handleRecord(quint8 recordType, quint16 address, QByteArray payload, int lineNum) {
     switch(recordType) {
     case 0x00:

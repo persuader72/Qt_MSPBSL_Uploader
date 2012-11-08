@@ -131,12 +131,25 @@ void MainWindow::onBslReplyReceived(BSLPacket *packet) {
 void MainWindow::on_FirmwareLoadButton_clicked() {
     QString fn=QFileDialog::getOpenFileName(this,"Select intel hex firmware file","","*.hex *.ihex");
     if(!fn.isNull()) {
+        QFileInfo finfo(fn);
+
         QFile f(fn);
         ui->FirmwareSelectedFile->setText(fn);
+
+
         if(!f.open(QIODevice::ReadOnly)) {
             qDebug()<< f.errorString();
         } else {
             parser.parseFile(f);
+
+            if(parser.endOfFile()) {
+                ui->FirmwareFileLabel->setText(QString("File name: %1").arg(finfo.fileName()));
+                ui->FirmwareSizeNameLabel->setText(QString("File size: %1 bytes").arg(finfo.size()));
+                ui->FirmwareMemoryLabel->setText(QString("Memory: %1 bytes").arg(parser.sumTotalMemory()));
+                ui->FirmwareBlocksLabel->setText(QString("Blocks: %1").arg(parser.segments().size()));
+                ui->FirmwareAddrLabel->setText(QString("Address: 0x%1").arg(parser.segments().at(0).address,4,16,QChar('0')));
+            }
+
             if(parser.endOfFile() && mBsl->state()==BootStrapLoader::bsl) {
                 onBslStateChanged(mBsl->state());
             }
