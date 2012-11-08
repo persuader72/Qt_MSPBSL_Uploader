@@ -156,8 +156,11 @@ void MainWindow::on_FirmwareLoadButton_clicked() {
 
 void MainWindow::on_SerialConnectButton_clicked() {
     if(mBsl->isRunning()) {
+        qDebug()<< "A";
         mBsl->terminate();
+        qDebug()<< "A";
         mBsl->wait();
+        qDebug()<< "A";
     } else {
         mBsl->setPortName(ui->SerialPortNameCombo->currentText());
         mBsl->start();
