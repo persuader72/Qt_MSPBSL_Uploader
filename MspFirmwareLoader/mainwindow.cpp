@@ -192,9 +192,7 @@ void MainWindow::on_OperationStartButton_clicked() {
             pkt->setExtraData(block++,0,0);
             mBsl->doPostPacket(pkt);
         }
-        qDebug() << j << segment.memory.size();
     }
-
 }
 
 void MainWindow::loadPlugins() {
