@@ -35,7 +35,7 @@ BSLCoreMessage::BSLCoreMessage() {
 }
 
 void BSLCoreMessage::deassemblePacket(const QByteArray &payload) {
-    //qDebug() << "BSLCoreMessage::deassemblePacket" << payload;
+    qDebug() << "BSLCoreMessage::deassemblePacket" << payload.toHex().toUpper();
     if(mPayload.size()==0) {
         setSequence(seqError);
         return;
