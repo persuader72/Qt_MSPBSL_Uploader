@@ -7,6 +7,7 @@ QString MyMoteSerialPlugin::pluginName() {
 }
 
 BootStrapLoader::bslState MyMoteSerialPlugin::timerTimeout(BootStrapLoader::bslState state) {
+    //qDebug("MyMoteSerialPlugin::timerTimeout");
     switch(state) {
     default:
         break;
@@ -26,11 +27,14 @@ QByteArray MyMoteSerialPlugin::escapeOutput(const QByteArray &output) {
 
 BootStrapLoader::bslState MyMoteSerialPlugin::incomingByte(quint8 byte) {
     Q_UNUSED(byte);
-    return BootStrapLoader::bsl;
+    qDebug("MyMoteSerialPlugin::incomingByte %02X %c",byte,byte);
+    if(byte==117) return BootStrapLoader::serial; else return BootStrapLoader::afterConnect;
 }
 
 BootStrapLoader::bslState MyMoteSerialPlugin::afterSerialConnect() {
-    QByteArray string("#U#U:05000615000100.#Q");
+    qDebug("MyMoteSerialPlugin::afterSerialConnect");
+    //QByteArray string("#u#u:05000615000100.#q");
+    QByteArray string("#q:050006150001.#u");
     mSerialPort->write(string);
     return BootStrapLoader::afterConnect;
 }
