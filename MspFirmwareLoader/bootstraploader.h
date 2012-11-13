@@ -40,7 +40,7 @@ class SerialPluginInterface;
 class BootStrapLoader : public QThread {
     Q_OBJECT
 public:
-    enum bslState { idle,serial,afterConnect,bsl,working,beforeConnect };
+    enum bslState { idle,serial,afterConnect,bsl,working,beforeDisconnect };
     explicit BootStrapLoader(QObject *parent = 0);
     virtual ~BootStrapLoader();
 public:

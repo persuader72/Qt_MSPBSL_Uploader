@@ -83,8 +83,11 @@ void BootStrapLoader::run() {
     if(mSerialPlugin) mSerialPlugin->setSerialPort(mSerialPort);
 
     if(mSerialPort->open(QIODevice::ReadWrite)) {
+        mSerialPort->setDtr(true);
+        mSerialPort->setRts(false);
+
         mTimer->start(50);
-        setState(serial);
+        if(mSerialPlugin) setState(mSerialPlugin->afterSerialConnect()); else setState(serial);
         exec();
         mTimer->stop();
     } else {
@@ -106,35 +109,49 @@ void BootStrapLoader::customEvent(QEvent *e) {
 }
 
 void BootStrapLoader::on_SerialPort_ReadyRead() {
-    quint8 incoming;
+    quint8 incoming; bslState newstate;
     while(mSerialPort->read((char *)&incoming,1)>0) {
-        if(mOutPacket==NULL) {
-            qDebug("Data (%d) recevived but no packet active!!!",incoming);
-        } else {
-            if(mOutPacket->reply()->incomingByte(incoming)) {
-                mComplQueue.append(mOutPacket);
 
-                qDebug() << mState << mOutPacket->reply()->sequence() <<  mOutPacket->hasReply();
-
-                if(mState==serial && mOutPacket->hasReply()) {
-                    BSLCoreCommmand* coreCommand = dynamic_cast<BSLCoreCommmand*>(mOutPacket);
-                    if(coreCommand && coreCommand->command()==BSLCoreCommmand::txBslVersion) {
-                        mOutPacket=NULL;
-                        setState(bsl);
-                        stateChanged(mState);
+        switch(mState) {
+        case afterConnect:
+        case beforeDisconnect:
+            if(mSerialPlugin) {
+                newstate=mSerialPlugin->incomingByte(incoming);
+                if(newstate!=mState) setState(newstate);
+            }
+            break;
+        case serial:
+            if(mOutPacket==NULL) {
+                qDebug("Data (%d) recevived but no packet active!!!",incoming);
+            } else {
+                if(mOutPacket->reply()->incomingByte(incoming)) {
+                    if(mOutPacket->hasReply()) {
+                        BSLCoreCommmand* coreCommand = dynamic_cast<BSLCoreCommmand*>(mOutPacket);
+                        if(coreCommand && coreCommand->command()==BSLCoreCommmand::txBslVersion) {
+                            mOutPacket=NULL;
+                            setState(bsl);
+                            stateChanged(mState);
+                        }
                     }
-                } else {
-
-                }
-
-                if(mOutPacket) {
-                    emit replyReceived(mOutPacket);
-                    mOutPacket=NULL;
-                    tryToSend();
                 }
             }
+            break;
+        case bsl:
+            if(mOutPacket==NULL) {
+                qDebug("Data (%d) recevived but no packet active!!!",incoming);
+            } else {
+                mComplQueue.append(mOutPacket);
+                emit replyReceived(mOutPacket);
+                mOutPacket=NULL;
+                tryToSend();
+            }
+            break;
+        default:
+            qDebug("BootStrapLoader::on_SerialPort_ReadyRead state:%d byte:%02X",state(),incoming);
+            break;
         }
     }
+
 }
 
 void BootStrapLoader::on_Timer_Timeout() {
@@ -167,7 +184,7 @@ void BootStrapLoader::on_Timer_Timeout() {
             }
         }
         break;
-    case beforeConnect:
+    case beforeDisconnect:
         if(mSerialPlugin) setState(mSerialPlugin->timerTimeout(mState));
         break;
     default:
