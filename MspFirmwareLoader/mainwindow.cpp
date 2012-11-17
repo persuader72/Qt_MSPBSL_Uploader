@@ -48,11 +48,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
     ui->setupUi(this);
 
     loadPlugins();
-    if(!mSerialPlugin) {
-        qDebug("MainWindow::MainWindow Could not load the plugin");
-    } else {
-        qDebug("MainWindow::MainWindow Loaded Plugin %s",mSerialPlugin->pluginName().toAscii().constData());
-    }
 
     QextPortInfo serinfo;
     QStringList result;
@@ -86,11 +81,11 @@ void MainWindow::onBslStateChanged(int state) {
     switch(state) {
     case BootStrapLoader::idle:
         ui->SerialConnectButton->setText("Connect");
-        ui->SerialPortGroup->setEnabled(true);
+        ui->SerialPluginCombo->setEnabled(true);
         ui->OperationGroup->setEnabled(false);
     case BootStrapLoader::serial:
         ui->SerialConnectButton->setText("Disconnect");
-        ui->SerialPortGroup->setEnabled(true);
+        ui->SerialPluginCombo->setEnabled(false);
         break;
     case BootStrapLoader::bsl:
         ui->SerialPortGroup->setEnabled(true);
@@ -201,6 +196,9 @@ void MainWindow::on_OperationStartButton_clicked() {
 void MainWindow::loadPlugins() {
     mSerialPlugin=NULL;
 
+    ui->SerialPluginCombo->clear();
+    ui->SerialPluginCombo->addItem("Direct UART");
+
      QDir pluginsDir(qApp->applicationDirPath());
 #if defined(Q_OS_WIN)
      if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release") pluginsDir.cdUp();
@@ -211,7 +209,18 @@ void MainWindow::loadPlugins() {
         QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
         QObject *plugin = pluginLoader.instance();
         if(plugin) {
-            mSerialPlugin = qobject_cast<SerialPluginInterface *>(plugin);
+            qDebug() << fileName;
+            SerialPluginInterface *serialplugin = qobject_cast<SerialPluginInterface *>(plugin);
+            serialplugin = qobject_cast<SerialPluginInterface *>(plugin);
+            if(serialplugin) {
+                mPlugins.append(serialplugin);
+                ui->SerialPluginCombo->addItem(serialplugin->pluginName());
+            }
         }
      }
+}
+
+void MainWindow::on_SerialPluginCombo_currentIndexChanged(int index) {
+    qDebug("MainWindow::on_SerialPluginCombo_currentIndexChanged %d",index);
+    if(index==0 || index==-1) mSerialPlugin=NULL; else mSerialPlugin=mPlugins[index-1];
 }

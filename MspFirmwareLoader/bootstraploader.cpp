@@ -83,9 +83,6 @@ void BootStrapLoader::run() {
     if(mSerialPlugin) mSerialPlugin->setSerialPort(mSerialPort);
 
     if(mSerialPort->open(QIODevice::ReadWrite)) {
-        mSerialPort->setDtr(true);
-        mSerialPort->setRts(false);
-
         mTimer->start(50);
         if(mSerialPlugin) setState(mSerialPlugin->afterSerialConnect()); else setState(serial);
         exec();
@@ -174,6 +171,7 @@ void BootStrapLoader::on_Timer_Timeout() {
         if(mSerialPlugin) setState(mSerialPlugin->timerTimeout(mState));
         break;
     case bsl:
+    case working:
         if(mOutPacket==NULL) {
             // TODO Polling in connected state ????
         } else {

@@ -55,6 +55,8 @@ private slots:
     void on_FirmwareLoadButton_clicked();
     void on_SerialConnectButton_clicked();
     void on_OperationStartButton_clicked();
+    void on_SerialPluginCombo_currentIndexChanged(int index);
+
 private:
     void loadPlugins();
     SerialPluginInterface *mSerialPlugin;
@@ -63,6 +65,8 @@ private:
     BootStrapLoader *mBsl;
     QIntelHexParser parser;
     QextSerialEnumerator mSerialEnum;
+private:
+    QList<SerialPluginInterface *> mPlugins;
 };
 
 #endif // MAINWINDOW_H

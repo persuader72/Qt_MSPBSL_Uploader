@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>517</width>
-    <height>349</height>
+    <height>395</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,13 +23,7 @@
       <property name="checkable">
        <bool>false</bool>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
-       <property name="spacing">
-        <number>2</number>
-       </property>
-       <property name="margin">
-        <number>2</number>
-       </property>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
         <layout class="QHBoxLayout" name="SerialPortLayout">
          <item>
@@ -57,6 +51,26 @@
            <property name="text">
             <string>&amp;Connect</string>
            </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="SerialPluginLayout">
+         <item>
+          <widget class="QLabel" name="SerialPluginLabel">
+           <property name="text">
+            <string>Serial port plugin:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="SerialPluginCombo">
+           <item>
+            <property name="text">
+             <string>UART Connection</string>
+            </property>
+           </item>
           </widget>
          </item>
         </layout>
