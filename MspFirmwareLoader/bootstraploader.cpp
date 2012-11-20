@@ -180,6 +180,7 @@ void BootStrapLoader::on_Timer_Timeout() {
                qDebug("BootStrapLoader::timerEvent timeout for packet");
                mOutPacket->setError(BSLPacket::errTimeout);
                mComplQueue.append(mOutPacket);
+               emit replyError(mOutPacket);
                mOutPacket=NULL;
                tryToSend();
             }

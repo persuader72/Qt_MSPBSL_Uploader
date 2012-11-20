@@ -82,6 +82,7 @@ signals:
     void stateChanged(int state);
     void errorRised(const QString &title,const QString &text);
     void replyReceived(BSLPacket *);
+    void replyError(BSLPacket *);
 };
 
 #endif // BOOTSTRAPLOADER_H

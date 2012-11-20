@@ -4,6 +4,8 @@ INCLUDEPATH    += ../../MspFirmwareLoader ../../MspFirmwareLoader/3rdparty/qexts
 TARGET          = $$qtLibraryTarget(optoisolateduart)
 DESTDIR         = ../../plugins
 
+include(3rdparty/qextserialport/src/qextserialport.pri)
+
 HEADERS += \
     optoisolateduart.h \
     optoisolateduart.h
