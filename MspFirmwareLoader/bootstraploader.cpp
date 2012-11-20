@@ -134,6 +134,7 @@ void BootStrapLoader::on_SerialPort_ReadyRead() {
             }
             break;
         case bsl:
+        case working:
             if(mOutPacket==NULL) {
                 qDebug("Data (%d) recevived but no packet active!!!",incoming);
             } else {
@@ -177,6 +178,8 @@ void BootStrapLoader::on_Timer_Timeout() {
         } else {
             if(mTimeout.elapsed()>mOutPacket->timeout()) {
                qDebug("BootStrapLoader::timerEvent timeout for packet");
+               mOutPacket->setError(BSLPacket::errTimeout);
+               mComplQueue.append(mOutPacket);
                mOutPacket=NULL;
                tryToSend();
             }

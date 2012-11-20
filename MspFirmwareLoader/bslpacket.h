@@ -37,6 +37,8 @@ class BSLPacket {
 public:
     enum eSequence { seqIdle,seqAckWait,seqHeaderWait,seqLenghtLWait,
                      seqLenghtHWait,seqReplyWait,seqCrcLWait,seqCrcHWait,seqDone,seqError };
+
+    enum eSeqError { errNoError, errTimeout, errCrcCheck };
 public:
     BSLPacket();
     virtual ~BSLPacket();
@@ -52,6 +54,8 @@ public:
     int extraData1() const { return mExtraData1; }
     int extraData2() const { return mExtraData2; }
     int extraData3() const { return mExtraData3; }
+    eSeqError error() const { return mError; }
+    void setError(eSeqError err) { mError=err; }
 public:
     virtual const QByteArray assemblePacket();
     virtual void deassemblePacket(const QByteArray &);
@@ -63,6 +67,7 @@ private:
     void clear();
 private:
     eSequence mSequence;
+    eSeqError mError;
     int mTimeout;
 protected:
     QByteArray mPayload;

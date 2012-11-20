@@ -13,7 +13,6 @@ public:
     virtual QString pluginName();
     virtual void setSerialPort(QextSerialPort *serialport) { mSerialPort=serialport; }
     virtual BootStrapLoader::bslState timerTimeout(BootStrapLoader::bslState state);
-
     virtual bool hasEscapeOutput() { return true; }
     virtual QByteArray escapeOutput(const QByteArray &output);
 

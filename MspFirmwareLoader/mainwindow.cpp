@@ -221,6 +221,5 @@ void MainWindow::loadPlugins() {
 }
 
 void MainWindow::on_SerialPluginCombo_currentIndexChanged(int index) {
-    qDebug("MainWindow::on_SerialPluginCombo_currentIndexChanged %d",index);
     if(index==0 || index==-1) mSerialPlugin=NULL; else mSerialPlugin=mPlugins[index-1];
 }

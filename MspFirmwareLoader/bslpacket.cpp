@@ -31,7 +31,7 @@
 #include "bslcoremessage.h"
 #include <QDebug>
 
-BSLPacket::BSLPacket()  {
+BSLPacket::BSLPacket() : mError(errNoError)  {
     // 100ms default timeout
     mTimeout=4000;
     mReply=NULL;
