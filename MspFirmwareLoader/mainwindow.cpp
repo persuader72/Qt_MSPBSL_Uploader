@@ -52,7 +52,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
     QextPortInfo serinfo;
     QStringList result;
     QList<QextPortInfo> serials = QextSerialEnumerator::getPorts();
-    foreach(serinfo,serials) result.append(serinfo.physName);
+    foreach(serinfo,serials) result.append(serinfo.portName);
 
     result.sort();
     ui->SerialPortNameCombo->addItems(result);
@@ -107,7 +107,7 @@ void MainWindow::onBslReplyReceived(BSLPacket *packet) {
     if(packet->reply()) {
         switch(packet->reply()->command()) {
         case BSLCoreMessage::Message:
-            qDebug("MainWindow::onBslReplyReceived Message: %02X",packet->reply()->message());
+            qDebug("MainWindow::onBslReplyReceived Message: %02X %d",packet->reply()->message(),packet->extraData1());
             if(packet->extraData1()!=-1) {
                 ui->OperationProgressBar->setValue(packet->extraData1());
             }
@@ -157,6 +157,7 @@ void MainWindow::on_SerialConnectButton_clicked() {
         mBsl->wait();
         qDebug()<< "A";
     } else {
+        mBsl->setSerialPlugin(mSerialPlugin);
         mBsl->setPortName(ui->SerialPortNameCombo->currentText());
         mBsl->start();
     }
@@ -209,10 +210,10 @@ void MainWindow::loadPlugins() {
         QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
         QObject *plugin = pluginLoader.instance();
         if(plugin) {
-            qDebug() << fileName;
             SerialPluginInterface *serialplugin = qobject_cast<SerialPluginInterface *>(plugin);
             serialplugin = qobject_cast<SerialPluginInterface *>(plugin);
             if(serialplugin) {
+                qDebug() << fileName;
                 mPlugins.append(serialplugin);
                 ui->SerialPluginCombo->addItem(serialplugin->pluginName());
             }
@@ -221,5 +222,11 @@ void MainWindow::loadPlugins() {
 }
 
 void MainWindow::on_SerialPluginCombo_currentIndexChanged(int index) {
+    qDebug(" MainWindow::on_SerialPluginCombo_currentIndexChanged %d",index);
     if(index==0 || index==-1) mSerialPlugin=NULL; else mSerialPlugin=mPlugins[index-1];
+}
+
+void MainWindow::on_SerialPluginCombo_activated(int index)
+{
+
 }

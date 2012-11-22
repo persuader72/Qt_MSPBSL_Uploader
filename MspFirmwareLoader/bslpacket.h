@@ -50,7 +50,7 @@ public:
     bool hasReply() const { return mReply!=NULL && mReply->sequence()==seqDone; }
     const BSLCoreMessage *reply() const { return (const BSLCoreMessage *)mReply; }
     BSLCoreMessage *reply();
-    void setExtraData(int e1, int e2, int e3) { mExtraData1=e1; mExtraData1=e2; mExtraData1=e3; }
+    void setExtraData(int e1, int e2, int e3) { mExtraData1=e1; mExtraData2=e2; mExtraData3=e3; }
     int extraData1() const { return mExtraData1; }
     int extraData2() const { return mExtraData2; }
     int extraData3() const { return mExtraData3; }

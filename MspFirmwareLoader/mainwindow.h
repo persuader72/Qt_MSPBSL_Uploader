@@ -57,6 +57,8 @@ private slots:
     void on_OperationStartButton_clicked();
     void on_SerialPluginCombo_currentIndexChanged(int index);
 
+    void on_SerialPluginCombo_activated(int index);
+
 private:
     void loadPlugins();
     SerialPluginInterface *mSerialPlugin;

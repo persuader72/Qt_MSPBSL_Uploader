@@ -119,7 +119,7 @@ void BootStrapLoader::on_SerialPort_ReadyRead() {
             break;
         case serial:
             if(mOutPacket==NULL) {
-                qDebug("Data (%d) recevived but no packet active!!!",incoming);
+                qDebug("Data (%d) (%c) recevived but no packet active!!!",incoming,incoming);
             } else {
                 if(mOutPacket->reply()->incomingByte(incoming)) {
                     if(mOutPacket->hasReply()) {
@@ -136,12 +136,14 @@ void BootStrapLoader::on_SerialPort_ReadyRead() {
         case bsl:
         case working:
             if(mOutPacket==NULL) {
-                qDebug("Data (%d) recevived but no packet active!!!",incoming);
+                qDebug("Data (%d) (%c) recevived but no packet active!!!",incoming,incoming);
             } else {
-                mComplQueue.append(mOutPacket);
-                emit replyReceived(mOutPacket);
-                mOutPacket=NULL;
-                tryToSend();
+                if(mOutPacket->reply()->incomingByte(incoming)) {
+                    mComplQueue.append(mOutPacket);
+                    emit replyReceived(mOutPacket);
+                    mOutPacket=NULL;
+                    tryToSend();
+                }
             }
             break;
         default:
@@ -176,14 +178,14 @@ void BootStrapLoader::on_Timer_Timeout() {
         if(mOutPacket==NULL) {
             // TODO Polling in connected state ????
         } else {
-            if(mTimeout.elapsed()>mOutPacket->timeout()) {
+            /*if(mTimeout.elapsed()>mOutPacket->timeout()) {
                qDebug("BootStrapLoader::timerEvent timeout for packet");
                mOutPacket->setError(BSLPacket::errTimeout);
                mComplQueue.append(mOutPacket);
                emit replyError(mOutPacket);
                mOutPacket=NULL;
                tryToSend();
-            }
+            }*/
         }
         break;
     case beforeDisconnect:

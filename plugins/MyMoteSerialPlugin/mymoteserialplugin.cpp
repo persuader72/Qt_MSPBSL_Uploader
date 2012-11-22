@@ -34,9 +34,17 @@ BootStrapLoader::bslState MyMoteSerialPlugin::incomingByte(quint8 byte) {
 BootStrapLoader::bslState MyMoteSerialPlugin::afterSerialConnect() {
     qDebug("MyMoteSerialPlugin::afterSerialConnect");
     //QByteArray string("#u#u:05000615000100.#q");
-    QByteArray string("#q:050006150001.#u");
+    QByteArray string("#q#q");       //esce da serale, il comando è doppio per gestire qualunque stato
+    string += ":05000611050100.";      //Master Uart 115200
+    string += "#u";                  //Entro in UART
+    string += "F0\n";                  //Mando Mote in BSL
+    string += "#q";                  //esco dalla seriale
+    string += ":05000615000100.";      //Imposta aux uart a 9600 su BSL
+    string += "#u";                  //Entro in UART
+
     mSerialPort->write(string);
-    return BootStrapLoader::afterConnect;
+
+    return BootStrapLoader::serial;
 }
 
 BootStrapLoader::bslState MyMoteSerialPlugin::beforeSerialDisconnect() {
