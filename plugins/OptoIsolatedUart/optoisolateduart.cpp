@@ -22,7 +22,7 @@ BootStrapLoader::bslState OptoIsolaredUart::incomingByte(quint8 byte) {
 BootStrapLoader::bslState OptoIsolaredUart::afterSerialConnect() {
     mSerialPort->setDtr(false);
     mSerialPort->setRts(true);
-    return BootStrapLoader::bsl;
+    return BootStrapLoader::serial;
 }
 
 BootStrapLoader::bslState OptoIsolaredUart::beforeSerialDisconnect() {

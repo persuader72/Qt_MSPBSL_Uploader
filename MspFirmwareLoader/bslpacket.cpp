@@ -98,7 +98,7 @@ bool BSLPacket::incomingByte(quint8 incoming) {
     return mSequence==seqDone || mSequence==seqError;
 }
 
-BSLCoreMessage *BSLPacket::reply() {
+BSLPacket *BSLPacket::reply() {
     if(!mReply) mReply=new BSLCoreMessage();
     return (BSLCoreMessage *)mReply;
 }

@@ -48,8 +48,8 @@ public:
     int timeout() const { return mTimeout; }
     bool incomingByte(quint8 incoming);
     bool hasReply() const { return mReply!=NULL && mReply->sequence()==seqDone; }
-    const BSLCoreMessage *reply() const { return (const BSLCoreMessage *)mReply; }
-    BSLCoreMessage *reply();
+    const BSLPacket *reply() const { return (const BSLPacket *)mReply; }
+    BSLPacket *reply();
     void setExtraData(int e1, int e2, int e3) { mExtraData1=e1; mExtraData2=e2; mExtraData3=e3; }
     int extraData1() const { return mExtraData1; }
     int extraData2() const { return mExtraData2; }

@@ -1,4 +1,4 @@
 TEMPLATE = subdirs
 SUBDIRS += MyMoteSerialPlugin \
-    MyMoteSerialPlugin \
-    OptoIsolatedUart
+           MyMoteSerialPlugin \
+           OptoIsolatedUart
